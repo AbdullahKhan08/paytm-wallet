@@ -24,7 +24,10 @@ export const authMiddleware = (
       if (err) {
         return res.status(403).json({ message: 'authentication Failed' })
       } else {
-        req.userId = user as ExtendedJwtPayload
+        const userObject = user as ExtendedJwtPayload
+        if (userObject.userId) {
+          req.user = userObject.userId
+        }
         next()
       }
     })

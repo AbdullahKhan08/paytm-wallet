@@ -1,10 +1,12 @@
-const express = require('express')
-const connectDb = require('./db/connect')
-const userRouter = require('./routes/user')
-const mainRouter = require('./routes/index')
-const accountRouter = require('./routes/account')
-const cors = require('cors')
-require('dotenv').config()
+import express from 'express'
+import { connectDb } from './db/connect'
+
+import userRouter from './routes/user'
+import mainRouter from './routes/index'
+import accountRouter from './routes/account'
+import cors from 'cors'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const app = express()
 app.use(express.json())
@@ -18,7 +20,7 @@ const PORT = process.env.PORT || 3009
 
 const start = async () => {
   try {
-    await connectDb(process.env.MONGO_URI)
+    await connectDb(process.env.MONGO_URI as string)
     app.listen(PORT, () => {
       console.log(`Server started on port ${PORT}`)
     })

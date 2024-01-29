@@ -6,5 +6,10 @@ export interface ExtendedJwtPayload extends JwtPayload {
 }
 
 export interface AuthenticatedRequest extends Request {
-  userId?: string | ExtendedJwtPayload | undefined
+  user?: string | ExtendedJwtPayload | undefined
+}
+
+export type TransferRequest = {
+  amount: number
+  to: string
 }
