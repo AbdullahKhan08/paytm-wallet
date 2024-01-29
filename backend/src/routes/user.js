@@ -1,12 +1,12 @@
 const express = require('express')
-const { User } = require('../models/User')
+const { User } = require('../../models/User')
 const router = express.Router()
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const zod = require('zod')
 const JWT_SECRET = process.env.JWT_SECRET
-const { authMiddleware } = require('../middleware/auth')
-const { Account } = require('../models/Account')
+const { authMiddleware } = require('../../middleware/auth')
+const { Account } = require('../../models/Account')
 
 const signupBody = zod.object({
   username: zod.string().email(),
@@ -20,7 +20,7 @@ router.get('/me', authMiddleware, async (req, res) => {
   if (!user) {
     return res.status(401).json({ message: 'user doesnt exist' })
   } else {
-    res.status(200).json({ id: req.userId })
+    res.status(200).json({ user })
   }
 })
 
@@ -52,12 +52,14 @@ router.post('/signup', async (req, res) => {
 
   await Account.create({
     userId,
-    balance: 1 + Math.random() * 10000,
+    balance: Math.floor(1 + Math.random() * 10000),
   })
 
   const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '48h' })
 
-  return res.status(201).json({ token, message: 'User created successfully ' })
+  return res
+    .status(201)
+    .json({ token, message: 'User created successfully', id: userId })
 })
 
 const signinBody = zod.object({
@@ -98,6 +100,7 @@ router.post('/signin', async (req, res) => {
     return res.status(200).json({
       token: token,
       message: 'User logged in successfully ',
+      id: userId,
     })
   }
 })
@@ -123,7 +126,7 @@ router.put('/updated', authMiddleware, async (req, res) => {
   })
 })
 
-router.get('/bulk', async (req, res) => {
+router.get('/bulk', authMiddleware, async (req, res) => {
   const filter = req.query.filter || ''
 
   const users = await User.find({
@@ -141,8 +144,10 @@ router.get('/bulk', async (req, res) => {
     ],
   })
 
-  return res.json({
-    user: users.map((user) => ({
+  const updatedUsers = users.filter((user) => user._id != req.userId)
+
+  return res.status(200).json({
+    user: updatedUsers.map((user) => ({
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,

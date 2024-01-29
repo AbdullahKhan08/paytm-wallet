@@ -5,5 +5,8 @@ export const userState = atom({
   default: {
     isLoading: true,
     id: null,
+    firstName: '',
+    lastName: '',
+    username: '',
   },
 })

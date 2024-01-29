@@ -1,4 +1,51 @@
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { userState } from '../store/atoms/user'
+import { BASE_URL } from '../config'
 const Signup = () => {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const [user, setUser] = useRecoilState(userState)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user.id) {
+      navigate('/dashboard')
+    }
+  })
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/user/signup`,
+        {
+          firstName,
+          lastName,
+          username: email,
+          password,
+        },
+        {
+          headers: {
+            'Content-type': 'application/json',
+          },
+        }
+      )
+
+      if (response.status === 201) {
+        const data = response.data
+        localStorage.setItem('token', data.token)
+        setUser({ isLoading: false, id: data.id })
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <div className="my-8">
       <div className="card w-96 bg-base-100 shadow-xl mx-auto my-auto max-w-4xl">
@@ -18,7 +65,9 @@ const Signup = () => {
             <input
               type="text"
               placeholder="John"
-              className="input input-bordered w-full max-w-xs"
+              onChange={(e) => setFirstName(e.target.value)}
+              value={firstName}
+              className="input input-bordered w-full max-w-xs border rounded border-slate-200"
             />
           </label>
           <label className="form-control w-full max-w-xs">
@@ -28,6 +77,8 @@ const Signup = () => {
             <input
               type="text"
               placeholder="Doe"
+              onChange={(e) => setLastName(e.target.value)}
+              value={lastName}
               className="input input-bordered w-full max-w-xs"
             />
           </label>
@@ -38,6 +89,8 @@ const Signup = () => {
             <input
               type="email"
               placeholder="johndoe@example.com"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
               className="input input-bordered w-full max-w-xs"
             />
           </label>
@@ -47,15 +100,25 @@ const Signup = () => {
             </div>
             <input
               type="password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
               className="input input-bordered w-full max-w-xs"
             />
           </label>
 
-          <button className="btn my-3 btn-neutral text-white">Sign Up</button>
+          <button
+            className="btn my-3 btn-neutral text-white"
+            onClick={handleSubmit}
+          >
+            Sign Up
+          </button>
           <p className="text-slate-950 flex justify-center">
             Already have an account?
             <span className="justify-center">
-              <a className="underline mx-2 hover:text-slate-600" href="/signin">
+              <a
+                className="underline pointer cursor-pointer mx-2 hover:text-slate-700"
+                href="/signin"
+              >
                 Signin
               </a>
             </span>

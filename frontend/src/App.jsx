@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import Signup from './components/Signup'
 import Signin from './components/signin'
 import Dashboard from './components/Dashboard'
@@ -8,18 +8,22 @@ import { userState } from './store/atoms/user'
 import { BASE_URL } from './config'
 import { RecoilRoot, useSetRecoilState } from 'recoil'
 import { useEffect } from 'react'
+import axios from 'axios'
+import SendMoney from './components/SendMoney'
 
 function App() {
   return (
     <div>
       <RecoilRoot>
         <BrowserRouter>
-          <InitUser />
           <Appbar />
+          <InitUser />
           <Routes>
+            <Route path="/" element={<Dashboard />}></Route>
             <Route path="/signup" element={<Signup />}></Route>
             <Route path="/signin" element={<Signin />}></Route>
             <Route path="/dashboard" element={<Dashboard />}></Route>
+            <Route path="/send/:id/:name" element={<SendMoney />}></Route>
           </Routes>
         </BrowserRouter>
       </RecoilRoot>
@@ -29,6 +33,7 @@ function App() {
 
 function InitUser() {
   const setUser = useSetRecoilState(userState)
+  const navigate = useNavigate()
   const init = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/user/me`, {
@@ -37,11 +42,19 @@ function InitUser() {
         },
       })
 
-      if (response.data.id) {
+      console.log(response.data)
+
+      const userData = response.data.user
+
+      if (userData) {
         setUser({
           isLoading: false,
-          id: response.data.id,
+          id: userData._id,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          username: userData.username,
         })
+        navigate('/dashboard')
       } else {
         setUser({
           isLoading: false,

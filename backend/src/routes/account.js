@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const { User } = require('../models/User')
+const { User } = require('../../models/User')
 require('dotenv').config()
-const { Account } = require('../models/Account')
+const { Account } = require('../../models/Account')
 const { authMiddleware } = require('../middleware/auth')
 
 router.get('/balance', authMiddleware, async (req, res) => {
